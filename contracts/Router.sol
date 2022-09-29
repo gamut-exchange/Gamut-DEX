@@ -61,7 +61,7 @@ contract Router is Vault, ReentrancyGuard, Ownable {
      * `assets` array passed to that function, and ETH assets are converted to WETH.
      *
      * If `amount` is zero, the multihop mechanism is used to determine the actual amount based on the amount in/out
-     * from the previous swap.
+     * from the previous swap, depending on the swap kind.
      */
     struct BatchSwapStep {
         uint256 assetInIndex;
@@ -523,8 +523,10 @@ contract Router is Vault, ReentrancyGuard, Ownable {
 
         InputHelpers.ensureInputLengthMatch(assets.length, limits.length);
 
+        uint256[] memory protocolSwapFees = new uint256[](assets.length - 1);
+
         // Perform the swaps, updating the Pool token balances and computing the net Vault asset deltas.
-        assetDeltas = _swapWithPools(swaps, assets, funds);
+        (assetDeltas, protocolSwapFees) = _swapWithPools(swaps, assets, funds);
 
         // Process asset deltas, by either transferring assets from the sender (for positive deltas) or to the recipient
         // (for negative deltas).
@@ -545,6 +547,12 @@ contract Router is Vault, ReentrancyGuard, Ownable {
                 uint256 toSend = uint256(-delta);
                 _sendAsset(asset, toSend, funds.recipient);
             }
+
+            _payFeeAmount(
+                Factory.getProtocolFeesCollector(),
+                IERC20(asset),
+                protocolSwapFees[i]
+            );
         }
 
         // Handle any used and remaining ETH.
@@ -560,8 +568,14 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         BatchSwapStep[] memory swaps,
         address[] memory assets,
         FundManagement memory funds
-    ) private returns (int256[] memory assetDeltas) {
+    )
+        private
+        returns (int256[] memory assetDeltas, uint256[] memory protocolSwapFees)
+    {
         assetDeltas = new int256[](assets.length);
+
+        // Because protocol swap fee is not charged on 'amountOut'
+        protocolSwapFees = new uint256[](assets.length - 1);
 
         // These variables could be declared inside the loop, but that causes the compiler to allocate memory on each
         // loop iteration, increasing gas costs.
@@ -571,9 +585,6 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         // These store data about the previous swap here to implement multihop logic across swaps.
         IERC20 previousTokenCalculated;
         uint256 previousAmountCalculated;
-
-        // Local copy to save gas
-        address protocolFeeCollector = Factory.getProtocolFeesCollector();
 
         for (uint256 i = 0; i < swaps.length; ++i) {
             batchSwapStep = swaps[i];
@@ -631,9 +642,9 @@ contract Router is Vault, ReentrancyGuard, Ownable {
             assetDeltas[batchSwapStep.assetOutIndex] =
                 assetDeltas[batchSwapStep.assetOutIndex] -
                 amountOut.toInt256();
-
-            // Paying fee right away to avoid tracking assetIn and it's respective protocol swap fee
-            _payFeeAmount(protocolFeeCollector, tokenIn, protocolSwapFeeAmount);
+            protocolSwapFees[
+                batchSwapStep.assetInIndex
+            ] += protocolSwapFeeAmount;
         }
     }
 

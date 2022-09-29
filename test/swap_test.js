@@ -213,6 +213,12 @@ describe("Single Swap 18 decimals", () => {
         .to.emit(Router, "Swap")
         .withArgs(tokenIn, tokenOut, amountIn, expectedOutputAmount, 0);
 
+      // const receipt = await (
+      //   await Router.swap(singleSwap, funds, limit, deadline)
+      // ).wait();
+      // console.log(ethers.utils.formatEther(receipt.events[0].args[2]));
+      // console.log(ethers.utils.formatEther(receipt.events[0].args[3]));
+
       const resultAfter = await Pool.getPoolBalancesAndChangeBlock();
       const balance0AfterSwap = resultAfter[0];
       const balance1AfterSwap = resultAfter[1];
