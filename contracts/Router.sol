@@ -78,6 +78,8 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         address payable recipient;
     }
 
+    event FactoryAddressSet(address factoryAddress);
+
     event PoolBalanceChanged(
         address indexed liquidityProvider,
         IERC20[] tokens,
@@ -102,6 +104,7 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         _require(address(_factory) != address(0), Errors.ZERO_TOKEN);
         _require(address(Factory) == address(0), Errors.FACTORY_ALREADY_SET);
         Factory = _factory;
+        emit FactoryAddressSet(address(_factory));
     }
 
     /**
@@ -136,10 +139,10 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         external
         payable
     {
+        _require(recipient != address(0), Errors.ZERO_ADDRESS);
+
         // This function doesn't have the nonReentrant modifier: it is applied to `_joinOrExit` instead.
 
-        // Note that `recipient` is not actually payable in the context of a join - we cast it because we handle both
-        // joins and exits at once.
         _joinOrExit(
             PoolBalanceChangeKind.JOIN,
             msg.sender,
@@ -149,6 +152,8 @@ contract Router is Vault, ReentrancyGuard, Ownable {
     }
 
     function exitPool(address sender, ExitPoolRequest memory request) external {
+        _require(sender != address(0), Errors.ZERO_ADDRESS);
+
         // This function doesn't have the nonReentrant modifier: it is applied to `_joinOrExit` instead.
         _joinOrExit(
             PoolBalanceChangeKind.EXIT,

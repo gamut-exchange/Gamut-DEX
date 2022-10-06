@@ -17,6 +17,8 @@ contract HedgeFactory is Ownable {
 
     mapping(address => mapping(address => address)) public getPool;
 
+    event ProtocolFeeCollectorSet(address protocolFeeCollectorAddress);
+
     event PoolCreated(
         address indexed token0,
         address indexed token1,
@@ -43,6 +45,7 @@ contract HedgeFactory is Ownable {
         _protocolFeesCollector = IProtocolFeesCollector(
             _newProtocolFeeCollector
         );
+        emit ProtocolFeeCollectorSet(_newProtocolFeeCollector);
     }
 
     /**

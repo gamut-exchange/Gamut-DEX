@@ -18,13 +18,20 @@ contract ProtocolFeesCollector is ReentrancyGuard, Ownable {
     // The protocol swap fee is charged whenever a swap occurs, as a percentage of the swap fee charged by the Pool.
     uint256 private _protocolSwapFeePercentage;
 
+    event FeesWithdrawn(
+        IERC20[] tokens,
+        uint256[] amounts,
+        address indexed recipient
+    );
     event SwapFeePercentageChanged(uint256 newSwapFeePercentage);
 
     function withdrawCollectedFees(
         IERC20[] calldata tokens,
         uint256[] calldata amounts,
         address recipient
-    ) external nonReentrant onlyOwner {
+    ) external onlyOwner {
+        _require(recipient != address(0), Errors.ZERO_ADDRESS);
+
         InputHelpers.ensureInputLengthMatch(tokens.length, amounts.length);
 
         for (uint256 i = 0; i < tokens.length; ++i) {
@@ -32,6 +39,7 @@ contract ProtocolFeesCollector is ReentrancyGuard, Ownable {
             uint256 amount = amounts[i];
             token.safeTransfer(recipient, amount);
         }
+        emit FeesWithdrawn(tokens, amounts, recipient);
     }
 
     function setSwapFeePercentage(uint256 newProtocolSwapFeePercentage)
