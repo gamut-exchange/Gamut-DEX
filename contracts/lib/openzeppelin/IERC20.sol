@@ -6,6 +6,20 @@ pragma solidity ^0.8.0;
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
 interface IERC20 {
+
+    //----------- Start EtherAuthority 7-Oct-2022 --------------
+    /**
+     * @dev Returns the name of tokens in existence.
+     */
+    function name() external view  returns (string memory);
+
+    /**
+     * @dev Returns the symbol of tokens in existence.
+     */
+    function symbol() external view returns (string memory);
+    //----------- End EtherAuthority 7-Oct-2022 --------------
+
+
     /**
      * @dev Returns the amount of tokens in existence.
      */

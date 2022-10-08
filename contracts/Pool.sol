@@ -95,6 +95,19 @@ contract Pool is WeightedMath, HedgePoolToken {
 
         _weight0 = params.weight0;
         _weight1 = params.weight1;
+
+        //----------- Start EtherAuthority 7-Oct-2022 --------------
+         string memory strToken0 = string(abi.encodePacked(_token0.symbol(), "/"));
+         string memory strToken1 = string(abi.encodePacked(strToken0,_token1.symbol()));
+         string memory strGToken = string(abi.encodePacked("Gamut ", strToken1));
+         string memory strPoolName = string(abi.encodePacked(strGToken, " Pool"));
+       
+        ERC20.setName(strPoolName);
+        ERC20.setSymbol("Gamut-LP");
+        //----------- End EtherAuthority 7-Oct-2022 -----------------
+
+
+
     }
 
     // Getters / Setters

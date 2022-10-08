@@ -60,15 +60,25 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     /**
      * @dev Returns the name of the token.
      */
-    function name() public view virtual override returns (string memory) {
+    function name() public view virtual override(IERC20, IERC20Metadata) returns (string memory) {
         return _name;
     }
+
+
+    //----------- Start Etherauthority 7-Oct-2022 --------------
+    function setName(string memory tName) internal  {
+        _name = tName;
+    }
+    function setSymbol(string memory tSymbol) internal  {
+        _symbol = tSymbol;
+    }
+     //----------- End Etherauthority 7-Oct-2022 --------------
 
     /**
      * @dev Returns the symbol of the token, usually a shorter version of the
      * name.
      */
-    function symbol() public view virtual override returns (string memory) {
+    function symbol() public view virtual override(IERC20, IERC20Metadata) returns (string memory) {
         return _symbol;
     }
 
