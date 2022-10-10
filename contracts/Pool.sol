@@ -3,10 +3,10 @@ pragma solidity 0.8.11;
 
 import "./lib/helpers/InputHelpers.sol";
 import "./WeightedMath.sol";
-import "./HedgePoolToken.sol";
+import "./GamutToken.sol";
 import "./lib/helpers/Decoder.sol";
 
-contract Pool is WeightedMath, HedgePoolToken {
+contract Pool is WeightedMath, GamutToken {
     using Decoder for bytes;
     using FixedPoint for uint256;
     using SafeCast for uint256;

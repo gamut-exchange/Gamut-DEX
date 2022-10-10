@@ -5,7 +5,7 @@ import "./interfaces/IProtocolFeesCollector.sol";
 import "./Pool.sol";
 import "./lib/openzeppelin/Ownable.sol";
 
-contract HedgeFactory is Ownable {
+contract GamutFactory is Ownable {
     IProtocolFeesCollector private _protocolFeesCollector;
 
     address private immutable ROUTER;

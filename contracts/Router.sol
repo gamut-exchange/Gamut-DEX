@@ -3,14 +3,14 @@ pragma solidity 0.8.11;
 
 import "./lib/helpers/InputHelpers.sol";
 import "./Vault.sol";
-import "./interfaces/IHedgeFactory.sol";
+import "./interfaces/IGamutFactory.sol";
 import "./interfaces/IPool.sol";
 import "./lib/openzeppelin/SafeCast.sol";
 import "./lib/openzeppelin/ReentrancyGuard.sol";
 import "./lib/openzeppelin/Ownable.sol";
 
 contract Router is Vault, ReentrancyGuard, Ownable {
-    IHedgeFactory public Factory;
+    IGamutFactory public Factory;
     using SafeCast for uint256;
 
     enum PoolBalanceChangeKind {
@@ -100,7 +100,7 @@ contract Router is Vault, ReentrancyGuard, Ownable {
 
     constructor(IWETH _weth) AssetHelpers(_weth) {}
 
-    function setHedgeFactory(IHedgeFactory _factory) external onlyOwner {
+    function setGamutFactory(IGamutFactory _factory) external onlyOwner {
         _require(address(_factory) != address(0), Errors.ZERO_TOKEN);
         _require(address(Factory) == address(0), Errors.FACTORY_ALREADY_SET);
         Factory = _factory;
