@@ -8,7 +8,7 @@ const web3 = require("web3");
 const { toWei, tokenSorted } = require("./helper");
 
 describe("Single Swap 18 decimals", () => {
-  let HedgeFactory;
+  let GamutFactory;
   let Router;
   let BTC;
   let USD;
@@ -38,13 +38,13 @@ describe("Single Swap 18 decimals", () => {
     // Passing in dead address instead of WETH
     Router = await routerContract.deploy(DEAD_ADDRESS);
 
-    const factoryContract = await ethers.getContractFactory("HedgeFactory");
-    HedgeFactory = await factoryContract.deploy(Router.address);
+    const factoryContract = await ethers.getContractFactory("GamutFactory");
+    GamutFactory = await factoryContract.deploy(Router.address);
 
     const zygContract = await ethers.getContractFactory("TestToken");
     ZYG = await zygContract.deploy("Zygnus", "ZYG", 9);
 
-    await Router.setHedgeFactory(HedgeFactory.address);
+    await Router.setGamutFactory(GamutFactory.address);
 
     // APPROVING TOKENS TO ROUTER CONTRACT
 
@@ -68,7 +68,7 @@ describe("Single Swap 18 decimals", () => {
     // CREATING POOL AND INITIALIZING IT
 
     const receipt = await (
-      await HedgeFactory.create(
+      await GamutFactory.create(
         BTC.address,
         USD.address,
         web3.utils.toWei("0.75"),
@@ -78,7 +78,7 @@ describe("Single Swap 18 decimals", () => {
       )
     ).wait();
 
-    let poolAddress = await HedgeFactory.getPool(BTC.address, USD.address);
+    let poolAddress = await GamutFactory.getPool(BTC.address, USD.address);
     Pool = await ethers.getContractAt("Pool", poolAddress);
 
     // Values must be decimal-normalized! (USDT has 6 decimals)
@@ -595,7 +595,7 @@ describe("Single Swap 18 decimals", () => {
 });
 
 describe("Single Swap (6 - 9) decimals", () => {
-  let HedgeFactory;
+  let GamutFactory;
   let Router;
   let BTC;
   let USD;
@@ -641,13 +641,13 @@ describe("Single Swap (6 - 9) decimals", () => {
     // Passing in dead address instead of WETH
     Router = await routerContract.deploy(DEAD_ADDRESS);
 
-    const factoryContract = await ethers.getContractFactory("HedgeFactory");
-    HedgeFactory = await factoryContract.deploy(Router.address);
+    const factoryContract = await ethers.getContractFactory("GamutFactory");
+    GamutFactory = await factoryContract.deploy(Router.address);
 
     const zygContract = await ethers.getContractFactory("TestToken");
     ZYG = await zygContract.deploy("Zygnus", "ZYG", 9);
 
-    await Router.setHedgeFactory(HedgeFactory.address);
+    await Router.setGamutFactory(GamutFactory.address);
 
     // APPROVING TOKENS TO ROUTER CONTRACT
 
@@ -671,7 +671,7 @@ describe("Single Swap (6 - 9) decimals", () => {
     // CREATING POOL AND INITIALIZING IT
 
     const receipt = await (
-      await HedgeFactory.create(
+      await GamutFactory.create(
         BTC.address,
         USD.address,
         web3.utils.toWei("0.75"),
@@ -681,7 +681,7 @@ describe("Single Swap (6 - 9) decimals", () => {
       )
     ).wait();
 
-    let poolAddress = await HedgeFactory.getPool(BTC.address, USD.address);
+    let poolAddress = await GamutFactory.getPool(BTC.address, USD.address);
     Pool = await ethers.getContractAt("Pool", poolAddress);
 
     // Values must be decimal-normalized! (USDT has 6 decimals)

@@ -6,8 +6,8 @@ const { deployContract } = waffle;
 const provider = waffle.provider;
 const web3 = require("web3");
 
-describe("Hedge Factory", () => {
-  let HedgeFactory;
+describe("Gamut Factory", () => {
+  let GamutFactory;
   let Router;
   let BTC;
   let USD;
@@ -30,8 +30,8 @@ describe("Hedge Factory", () => {
     // Passing in dead address instead of WETH
     Router = await routerContract.deploy(DEAD_ADDRESS);
 
-    const factoryContract = await ethers.getContractFactory("HedgeFactory");
-    HedgeFactory = await factoryContract.deploy(Router.address);
+    const factoryContract = await ethers.getContractFactory("GamutFactory");
+    GamutFactory = await factoryContract.deploy(Router.address);
 
     const btcContract = await ethers.getContractFactory("TestToken");
     BTC = await btcContract.deploy("Bitcoin", "BTC", 18);
@@ -46,7 +46,7 @@ describe("Hedge Factory", () => {
   describe("Pools Creation", () => {
     it("Create Pool with normal weights", async () => {
       // const receipt = await (
-      //   await HedgeFactory.create(
+      //   await GamutFactory.create(
       //     BTC.address,
       //     USD.address,
       //     web3.utils.toWei("0.75"),
@@ -58,7 +58,7 @@ describe("Hedge Factory", () => {
       // expect(receipt.events[1].event).to.equal("PoolCreated");
 
       await expect(
-        HedgeFactory.create(
+        GamutFactory.create(
           BTC.address,
           USD.address,
           web3.utils.toWei("0.75"),
@@ -66,13 +66,13 @@ describe("Hedge Factory", () => {
           POOL_SWAP_FEE_PERCENTAGE,
           false
         )
-      ).to.emit(HedgeFactory, "PoolCreated");
+      ).to.emit(GamutFactory, "PoolCreated");
     });
 
     describe("Pool Constructor arguments", () => {
       let Pool;
       before("Load Pool Address", async () => {
-        let poolAddress = await HedgeFactory.getPool(BTC.address, USD.address);
+        let poolAddress = await GamutFactory.getPool(BTC.address, USD.address);
         Pool = await ethers.getContractAt("Pool", poolAddress);
       });
 
@@ -95,7 +95,7 @@ describe("Hedge Factory", () => {
       });
 
       it("sets the name", async () => {
-        expect(await Pool.name()).to.equal("Hedge Pool Token");
+        expect(await Pool.name()).to.equal("Gamut Pool Token");
       });
 
       it("sets the symbol", async () => {
@@ -111,7 +111,7 @@ describe("Hedge Factory", () => {
   describe("Revert Pool Creation", () => {
     it("Reverts: Create pool with existing pair", async () => {
       await expect(
-        HedgeFactory.create(
+        GamutFactory.create(
           BTC.address,
           USD.address,
           web3.utils.toWei("0.75"),
@@ -124,7 +124,7 @@ describe("Hedge Factory", () => {
 
     it("Reverts: Create pool with weights sum more than one", async () => {
       await expect(
-        HedgeFactory.create(
+        GamutFactory.create(
           ZYG.address,
           BTC.address,
           web3.utils.toWei("0.85"),
@@ -137,7 +137,7 @@ describe("Hedge Factory", () => {
 
     it("Reverts: Create pool with weights sum less than one", async () => {
       await expect(
-        HedgeFactory.create(
+        GamutFactory.create(
           ZYG.address,
           BTC.address,
           web3.utils.toWei("0.5"),
@@ -150,7 +150,7 @@ describe("Hedge Factory", () => {
 
     it("Reverts: Create pool with weight of a token less than Minimum weight allowed", async () => {
       await expect(
-        HedgeFactory.create(
+        GamutFactory.create(
           ZYG.address,
           BTC.address,
           web3.utils.toWei("0.1"),
@@ -163,7 +163,7 @@ describe("Hedge Factory", () => {
 
     it("Reverts: Create pool with identical address", async () => {
       await expect(
-        HedgeFactory.create(
+        GamutFactory.create(
           BTC.address,
           BTC.address,
           web3.utils.toWei("0.3"),
@@ -176,7 +176,7 @@ describe("Hedge Factory", () => {
 
     it("Reverts: Create pool with zero address", async () => {
       await expect(
-        HedgeFactory.create(
+        GamutFactory.create(
           ZERO_ADDRESS,
           BTC.address,
           web3.utils.toWei("0.3"),
@@ -189,7 +189,7 @@ describe("Hedge Factory", () => {
 
     it("Reverts: Create pool with high swap fee", async () => {
       await expect(
-        HedgeFactory.create(
+        GamutFactory.create(
           USD.address,
           ZYG.address,
           web3.utils.toWei("0.3"),
@@ -202,7 +202,7 @@ describe("Hedge Factory", () => {
 
     it("Reverts: Create pool with low swap fee", async () => {
       await expect(
-        HedgeFactory.create(
+        GamutFactory.create(
           USD.address,
           ZYG.address,
           web3.utils.toWei("0.3"),
