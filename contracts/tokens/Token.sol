@@ -67,7 +67,7 @@ contract TestToken is Context, IERC20, IERC20Metadata {
     /**
      * @dev Returns the name of the token.
      */
-    function name() public view virtual override returns (string memory) {
+    function name() public view virtual override(IERC20, IERC20Metadata) returns (string memory) {
         return _name;
     }
 
@@ -75,7 +75,7 @@ contract TestToken is Context, IERC20, IERC20Metadata {
      * @dev Returns the symbol of the token, usually a shorter version of the
      * name.
      */
-    function symbol() public view virtual override returns (string memory) {
+    function symbol() public view virtual override(IERC20, IERC20Metadata) returns (string memory) {
         return _symbol;
     }
 
