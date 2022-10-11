@@ -95,11 +95,11 @@ describe("Gamut Factory", () => {
       });
 
       it("sets the name", async () => {
-        expect(await Pool.name()).to.equal("Gamut Pool Token");
+        expect(await Pool.name()).to.include("Gamut");
       });
 
       it("sets the symbol", async () => {
-        expect(await Pool.symbol()).to.equal("HT");
+        expect(await Pool.symbol()).to.equal("Gamut-LP");
       });
 
       it("sets the decimals", async () => {
