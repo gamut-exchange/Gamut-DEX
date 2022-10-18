@@ -97,7 +97,7 @@ contract GamutFactory is Ownable {
                 : (tokenB, tokenA, weightB, weightA);
 
         _require(_token0 != address(0), Errors.ZERO_TOKEN);
-        //_require(getPool[_token0][_token1] == address(0), Errors.POOL_EXISTS);
+        _require(getPool[_token0][_token1] == address(0), Errors.POOL_EXISTS);
 
         Pool.NewPoolParams memory params = Pool.NewPoolParams({
             router: getRouter(),
