@@ -97,17 +97,20 @@ contract Pool is WeightedMath, GamutToken {
         _weight1 = params.weight1;
 
         //----------- Start EtherAuthority 7-Oct-2022 --------------
-         string memory strToken0 = string(abi.encodePacked(_token0.symbol(), "/"));
-         string memory strToken1 = string(abi.encodePacked(strToken0,_token1.symbol()));
-         string memory strGToken = string(abi.encodePacked("Gamut ", strToken1));
-         string memory strPoolName = string(abi.encodePacked(strGToken, " Pool"));
-       
+        string memory strToken0 = string(
+            abi.encodePacked(_token0.symbol(), "/")
+        );
+        string memory strToken1 = string(
+            abi.encodePacked(strToken0, _token1.symbol())
+        );
+        string memory strGToken = string(abi.encodePacked("Gamut ", strToken1));
+        string memory strPoolName = string(
+            abi.encodePacked(strGToken, " Pool")
+        );
+
         ERC20.setName(strPoolName);
         ERC20.setSymbol("Gamut-LP");
         //----------- End EtherAuthority 7-Oct-2022 -----------------
-
-
-
     }
 
     // Getters / Setters
@@ -316,7 +319,10 @@ contract Pool is WeightedMath, GamutToken {
         uint256 protocolFeeAmount = feeAmount.mulUp(protocolSwapFeePercentage);
         amountIn = amountIn - feeAmount;
 
-        return (amountIn, protocolFeeAmount);
+        return (
+            amountIn,
+            _downscaleDown(protocolFeeAmount, scalingFactorTokenIn)
+        );
     }
 
     function _calcSwapOut(
