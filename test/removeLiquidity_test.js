@@ -142,8 +142,8 @@ describe("Remove Liquidity", () => {
       //const weightsAfterSwap = await Pool.getWeights();
 
       if (tokenSorted(BTC.address, USD.address)) {
-        let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
-        let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
+        let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
+        let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
 
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
@@ -211,8 +211,8 @@ describe("Remove Liquidity", () => {
       // const weightsAfterSwap = await Pool.getWeights();
 
       if (tokenSorted(BTC.address, USD.address)) {
-        let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
-        let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
+        let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
+        let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
 
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
@@ -347,8 +347,8 @@ describe("Remove Liquidity", () => {
       //   const weightsAfterSwap = await Pool.getWeights();
 
       if (tokenSorted(BTC.address, USD.address)) {
-        let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
-        let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
+        let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
+        let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
 
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
@@ -483,8 +483,8 @@ describe("Remove Liquidity", () => {
       // const weightsAfterSwap = await Pool.getWeights();
 
       if (tokenSorted(BTC.address, USD.address)) {
-        let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
-        let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
+        let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
+        let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
 
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
@@ -635,8 +635,8 @@ describe("Remove Liquidity", () => {
       //   const weightsAfterSwap = await Pool.getWeights();
 
       if (tokenSorted(BTC.address, USD.address)) {
-        let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
-        let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
+        let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
+        let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
 
         console.log("BTC --> ", btcOutput);
         console.log("USD --> ", usdOutput);
