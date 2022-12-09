@@ -5,7 +5,7 @@ import "./interfaces/IProtocolFeesCollector.sol";
 import "./Pool.sol";
 import "./lib/openzeppelin/Ownable.sol";
 
-contract HedgeFactory is Ownable {
+contract GamutFactory is Ownable {
     IProtocolFeesCollector private _protocolFeesCollector;
 
     address private immutable ROUTER;
@@ -16,6 +16,8 @@ contract HedgeFactory is Ownable {
     address[] public allPools;
 
     mapping(address => mapping(address => address)) public getPool;
+
+    event ProtocolFeeCollectorSet(address protocolFeeCollectorAddress);
 
     event PoolCreated(
         address indexed token0,
@@ -43,6 +45,7 @@ contract HedgeFactory is Ownable {
         _protocolFeesCollector = IProtocolFeesCollector(
             _newProtocolFeeCollector
         );
+        emit ProtocolFeeCollectorSet(_newProtocolFeeCollector);
     }
 
     /**

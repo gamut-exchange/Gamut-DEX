@@ -8,7 +8,7 @@ const web3 = require("web3");
 const { toWei, tokenSorted } = require("./helper");
 
 describe("Remove Liquidity", () => {
-  let HedgeFactory;
+  let GamutFactory;
   let Router;
   let BTC;
   let USD;
@@ -41,13 +41,13 @@ describe("Remove Liquidity", () => {
       // Passing in dead address instead of WETH
       Router = await routerContract.deploy(DEAD_ADDRESS);
 
-      const factoryContract = await ethers.getContractFactory("HedgeFactory");
-      HedgeFactory = await factoryContract.deploy(Router.address);
+      const factoryContract = await ethers.getContractFactory("GamutFactory");
+      GamutFactory = await factoryContract.deploy(Router.address);
 
       const zygContract = await ethers.getContractFactory("TestToken");
       ZYG = await zygContract.deploy("Zygnus", "ZYG", 9);
 
-      await Router.setHedgeFactory(HedgeFactory.address);
+      await Router.setGamutFactory(GamutFactory.address);
 
       // APPROVING TOKENS TO ROUTER CONTRACT
 
@@ -71,7 +71,7 @@ describe("Remove Liquidity", () => {
       // CREATING POOL AND INITIALIZING IT
 
       const receipt = await (
-        await HedgeFactory.create(
+        await GamutFactory.create(
           BTC.address,
           USD.address,
           toWei("0.75"),
@@ -81,7 +81,7 @@ describe("Remove Liquidity", () => {
         )
       ).wait();
 
-      let poolAddress = await HedgeFactory.getPool(BTC.address, USD.address);
+      let poolAddress = await GamutFactory.getPool(BTC.address, USD.address);
       Pool = await ethers.getContractAt("Pool", poolAddress);
 
       // Values must be decimal-normalized! (USDT has 6 decimals)
@@ -115,16 +115,15 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% BTC against 237.841 (10%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.756226640667729522);
       //   let expectedWeightUSD = toWei(0.243773359332270478);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("237.841"), toWei(weightToken0)]
+        [toWei("237.841"), toWei(1)]
       );
 
       const exitPoolRequest = {
         tokens: tokens,
-        minAmountsOut: [0, toWei(0)],
+        minAmountsOut: [0, toWei("0")],
         userData: initUserData,
       };
 
@@ -146,9 +145,6 @@ describe("Remove Liquidity", () => {
         let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
         let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
 
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
-
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
         ).to.be.equal(
@@ -168,9 +164,6 @@ describe("Remove Liquidity", () => {
       } else {
         let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
         let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
-
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
 
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
@@ -191,11 +184,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% USD against 237.841 (10%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.731570382507179636);
       //   let expectedWeightUSD = toWei(0.268429617492820364);
-      let weightToken0 = !tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("237.841"), toWei(weightToken0)]
+        [toWei("237.841"), toWei(0)]
       );
 
       const exitPoolRequest = {
@@ -222,9 +214,6 @@ describe("Remove Liquidity", () => {
         let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
         let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
 
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
-
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
         ).to.be.equal(
@@ -242,11 +231,8 @@ describe("Remove Liquidity", () => {
         // expect(weightsAfterSwap[0]).to.be.equal(expectedWeightBTC);
         // expect(weightsAfterSwap[1]).to.be.equal(expectedWeightUSD);
       } else {
-        let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
-        let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
-
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
+        let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
+        let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
 
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
@@ -267,11 +253,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% BTC against 2259.4895 (95%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.764222229840514696);
       //   let expectedWeightUSD = toWei(0.235777770159485304);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("2259.4895"), toWei(weightToken0)]
+        [toWei("2259.4895"), toWei(1)]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -297,9 +282,6 @@ describe("Remove Liquidity", () => {
         let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
         let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
 
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
-
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
         ).to.be.equal(
@@ -319,9 +301,6 @@ describe("Remove Liquidity", () => {
       } else {
         let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
         let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
-
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
 
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
@@ -342,11 +321,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% USD against 2259.4895 (95%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.73379045283329026);
       //   let expectedWeightUSD = toWei(0.26620954716670974);
-      let weightToken0 = !tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("2259.4895"), toWei(weightToken0)]
+        [toWei("2259.4895"), toWei(0)]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -372,9 +350,6 @@ describe("Remove Liquidity", () => {
         let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
         let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
 
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
-
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
         ).to.be.equal(
@@ -392,11 +367,8 @@ describe("Remove Liquidity", () => {
         // expect(weightsAfterSwap[0]).to.be.equal(expectedWeightBTC);
         // expect(weightsAfterSwap[1]).to.be.equal(expectedWeightUSD);
       } else {
-        let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
-        let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
-
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
+        let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
+        let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
 
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
@@ -417,11 +389,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% BTC against 23.7841 (1%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.750624363830809296);
       //   let expectedWeightUSD = toWei(0.249375636169190704);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("23.7841"), toWei(weightToken0)]
+        [toWei("23.7841"), toWei(1)]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -447,9 +418,6 @@ describe("Remove Liquidity", () => {
         let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
         let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
 
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
-
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
         ).to.be.equal(
@@ -470,9 +438,6 @@ describe("Remove Liquidity", () => {
         let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
         let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
 
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
-
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
         ).to.be.equal(
@@ -492,11 +457,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% USD against 23.7841 (1%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.74812717052703947);
       //   let expectedWeightUSD = toWei(0.25187282947296053);
-      let weightToken0 = !tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("23.7841"), toWei(weightToken0)]
+        [toWei("23.7841"), toWei(0)]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -522,9 +486,6 @@ describe("Remove Liquidity", () => {
         let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
         let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
 
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
-
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
         ).to.be.equal(
@@ -542,11 +503,8 @@ describe("Remove Liquidity", () => {
         // expect(weightsAfterSwap[0]).to.be.equal(expectedWeightBTC);
         // expect(weightsAfterSwap[1]).to.be.equal(expectedWeightUSD);
       } else {
-        let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
-        let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
-
-        console.log("BTC -->", btcOutput);
-        console.log("USD --> ", usdOutput);
+        let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
+        let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
 
         expect(
           Number(ethers.utils.formatEther(balance0BeforeSwap))
@@ -576,13 +534,13 @@ describe("Remove Liquidity", () => {
       // Passing in dead address instead of WETH
       Router = await routerContract.deploy(DEAD_ADDRESS);
 
-      const factoryContract = await ethers.getContractFactory("HedgeFactory");
-      HedgeFactory = await factoryContract.deploy(Router.address);
+      const factoryContract = await ethers.getContractFactory("GamutFactory");
+      GamutFactory = await factoryContract.deploy(Router.address);
 
       const zygContract = await ethers.getContractFactory("TestToken");
       ZYG = await zygContract.deploy("Zygnus", "ZYG", 9);
 
-      await Router.setHedgeFactory(HedgeFactory.address);
+      await Router.setGamutFactory(GamutFactory.address);
 
       // APPROVING TOKENS TO ROUTER CONTRACT
 
@@ -606,7 +564,7 @@ describe("Remove Liquidity", () => {
       // CREATING POOL AND INITIALIZING IT
 
       const receipt = await (
-        await HedgeFactory.create(
+        await GamutFactory.create(
           BTC.address,
           USD.address,
           toWei("0.75"),
@@ -616,7 +574,7 @@ describe("Remove Liquidity", () => {
         )
       ).wait();
 
-      let poolAddress = await HedgeFactory.getPool(BTC.address, USD.address);
+      let poolAddress = await GamutFactory.getPool(BTC.address, USD.address);
       Pool = await ethers.getContractAt("Pool", poolAddress);
 
       // Values must be decimal-normalized! (USDT has 6 decimals)
@@ -650,11 +608,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% BTC against 237.841 (10%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.756226640667729522);
       //   let expectedWeightUSD = toWei(0.243773359332270478);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("237.841"), toWei(weightToken0)]
+        [toWei("237.841"), toWei(1)]
       );
 
       const exitPoolRequest = {
@@ -701,8 +658,8 @@ describe("Remove Liquidity", () => {
         // expect(weightsAfterSwap[0]).to.be.equal(expectedWeightBTC);
         // expect(weightsAfterSwap[1]).to.be.equal(expectedWeightUSD);
       } else {
-        let usdOutput = ethers.utils.formatEther(receipt.events[2].args[2][0]);
-        let btcOutput = ethers.utils.formatEther(receipt.events[2].args[2][1]);
+        let usdOutput = ethers.utils.formatEther(receipt.events[3].args[2][0]);
+        let btcOutput = ethers.utils.formatEther(receipt.events[3].args[2][1]);
 
         console.log("BTC --> ", btcOutput);
         console.log("USD --> ", usdOutput);
@@ -726,11 +683,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% USD against 237.841 (10%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.736186200809523468);
       //   let expectedWeightUSD = toWei(0.263813799190476532);
-      let weightToken0 = !tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("237.841"), toWei(weightToken0)]
+        [toWei("237.841"), toWei(0)]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -801,11 +757,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% BTC against 594.6025 (25%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.757157271240523109);
       //   let expectedWeightUSD = toWei(0.242842728759476891);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("594.6025"), toWei(weightToken0)]
+        [toWei("594.6025"), toWei(1)]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -876,11 +831,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% USD against 594.6025 (25%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.697871584457895486);
       //   let expectedWeightUSD = toWei(0.302128415542104514);
-      let weightToken0 = !tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("594.6025"), toWei(weightToken0)]
+        [toWei("594.6025"), toWei(0)]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -951,11 +905,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 100% BTC against 23.7841 (1%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.700910335998801791);
       //   let expectedWeightUSD = toWei(0.299089664001198209);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("23.7841"), toWei(weightToken0)]
+        [toWei("23.7841"), toWei(1)]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -1014,26 +967,22 @@ describe("Remove Liquidity", () => {
             Number(-1 * usdOutput)
         );
 
-        // expected: 540.5010107302031
-        // actual: 540.501010730203
-
-        // expect(
-        //   Number(ethers.utils.formatEther(balance1BeforeSwap))
-        // ).to.be.equal(
-        //   Number(ethers.utils.formatEther(balance1AfterSwap)) +
-        //     Number(-1 * btcOutput)
-        // );
+        expect(
+          Number(ethers.utils.formatEther(balance1BeforeSwap))
+        ).to.be.equal(
+          Number(ethers.utils.formatEther(balance1AfterSwap)) +
+            Number(-1 * btcOutput)
+        );
       }
     });
 
     it("Remove liquidity 100% USD against 23.7841 (1%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.693698966351599154);
       //   let expectedWeightUSD = toWei(0.306301033648400846);
-      let weightToken0 = !tokenSorted(BTC.address, USD.address) ? 1 : 0;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("23.7841"), toWei(weightToken0)]
+        [toWei("23.7841"), toWei(0)]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -1113,13 +1062,13 @@ describe("Remove Liquidity", () => {
       // Passing in dead address instead of WETH
       Router = await routerContract.deploy(DEAD_ADDRESS);
 
-      const factoryContract = await ethers.getContractFactory("HedgeFactory");
-      HedgeFactory = await factoryContract.deploy(Router.address);
+      const factoryContract = await ethers.getContractFactory("GamutFactory");
+      GamutFactory = await factoryContract.deploy(Router.address);
 
       const zygContract = await ethers.getContractFactory("TestToken");
       ZYG = await zygContract.deploy("Zygnus", "ZYG", 9);
 
-      await Router.setHedgeFactory(HedgeFactory.address);
+      await Router.setGamutFactory(GamutFactory.address);
 
       // APPROVING TOKENS TO ROUTER CONTRACT
 
@@ -1143,7 +1092,7 @@ describe("Remove Liquidity", () => {
       // CREATING POOL AND INITIALIZING IT
 
       const receipt = await (
-        await HedgeFactory.create(
+        await GamutFactory.create(
           BTC.address,
           USD.address,
           toWei("0.75"),
@@ -1153,7 +1102,7 @@ describe("Remove Liquidity", () => {
         )
       ).wait();
 
-      let poolAddress = await HedgeFactory.getPool(BTC.address, USD.address);
+      let poolAddress = await GamutFactory.getPool(BTC.address, USD.address);
       Pool = await ethers.getContractAt("Pool", poolAddress);
 
       // Values must be decimal-normalized! (USDT has 6 decimals)
@@ -1187,11 +1136,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity Equal weights against 237.841 (10%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.75);
       //   let expectedWeightUSD = toWei(0.25);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 0.75 : 0.25;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("237.841"), toWei(weightToken0)]
+        [toWei("237.841"), toWei("0.75")]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -1262,11 +1210,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity Equal weights 2259.4895 (95%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.75);
       //   let expectedWeightUSD = toWei(0.25);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 0.75 : 0.25;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("2259.4895"), toWei(weightToken0)]
+        [toWei("2259.4895"), toWei("0.75")]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -1337,11 +1284,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity Equal weights against 23.7841 (1%) LP", async () => {
       //   let expectedWeightBTC = toWei(0.75);
       //   let expectedWeightUSD = toWei(0.25);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 0.75 : 0.25;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("23.7841"), toWei(weightToken0)]
+        [toWei("23.7841"), toWei("0.75")]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -1421,13 +1367,13 @@ describe("Remove Liquidity", () => {
       // Passing in dead address instead of WETH
       Router = await routerContract.deploy(DEAD_ADDRESS);
 
-      const factoryContract = await ethers.getContractFactory("HedgeFactory");
-      HedgeFactory = await factoryContract.deploy(Router.address);
+      const factoryContract = await ethers.getContractFactory("GamutFactory");
+      GamutFactory = await factoryContract.deploy(Router.address);
 
       const zygContract = await ethers.getContractFactory("TestToken");
       ZYG = await zygContract.deploy("Zygnus", "ZYG", 9);
 
-      await Router.setHedgeFactory(HedgeFactory.address);
+      await Router.setGamutFactory(GamutFactory.address);
 
       // APPROVING TOKENS TO ROUTER CONTRACT
 
@@ -1451,7 +1397,7 @@ describe("Remove Liquidity", () => {
       // CREATING POOL AND INITIALIZING IT
 
       const receipt = await (
-        await HedgeFactory.create(
+        await GamutFactory.create(
           BTC.address,
           USD.address,
           toWei("0.75"),
@@ -1461,7 +1407,7 @@ describe("Remove Liquidity", () => {
         )
       ).wait();
 
-      let poolAddress = await HedgeFactory.getPool(BTC.address, USD.address);
+      let poolAddress = await GamutFactory.getPool(BTC.address, USD.address);
       Pool = await ethers.getContractAt("Pool", poolAddress);
 
       // Values must be decimal-normalized! (USDT has 6 decimals)
@@ -1726,13 +1672,13 @@ describe("Remove Liquidity", () => {
       // Passing in dead address instead of WETH
       Router = await routerContract.deploy(DEAD_ADDRESS);
 
-      const factoryContract = await ethers.getContractFactory("HedgeFactory");
-      HedgeFactory = await factoryContract.deploy(Router.address);
+      const factoryContract = await ethers.getContractFactory("GamutFactory");
+      GamutFactory = await factoryContract.deploy(Router.address);
 
       const zygContract = await ethers.getContractFactory("TestToken");
       ZYG = await zygContract.deploy("Zygnus", "ZYG", 9);
 
-      await Router.setHedgeFactory(HedgeFactory.address);
+      await Router.setGamutFactory(GamutFactory.address);
 
       // APPROVING TOKENS TO ROUTER CONTRACT
 
@@ -1756,7 +1702,7 @@ describe("Remove Liquidity", () => {
       // CREATING POOL AND INITIALIZING IT
 
       const receipt = await (
-        await HedgeFactory.create(
+        await GamutFactory.create(
           BTC.address,
           USD.address,
           toWei("0.75"),
@@ -1766,7 +1712,7 @@ describe("Remove Liquidity", () => {
         )
       ).wait();
 
-      let poolAddress = await HedgeFactory.getPool(BTC.address, USD.address);
+      let poolAddress = await GamutFactory.getPool(BTC.address, USD.address);
       Pool = await ethers.getContractAt("Pool", poolAddress);
 
       // Values must be decimal-normalized! (USDT has 6 decimals)
@@ -1800,11 +1746,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 20-80 against 237.841 (10%) LP", async () => {
       // let expectedWeightBTC = toWei(0.736017161801744292);
       // let expectedWeightUSD = toWei(0.263982838198255708);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 0.2 : 0.8;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("237.841"), toWei(weightToken0)]
+        [toWei("237.841"), toWei("0.2")]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -1874,11 +1819,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 20 - 80 against 2259.4895 (95%) LP", async () => {
       // let expectedWeightBTC = toWei(0.729708837735093114);
       // let expectedWeightUSD = toWei(0.270291162264906886);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 0.2 : 0.8;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("2259.4895"), toWei(weightToken0)]
+        [toWei("2259.4895"), toWei("0.2")]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -1949,11 +1893,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 20 - 80 against 23.7841 (1%) LP", async () => {
       // let expectedWeightBTC = toWei(0.748622818209810333);
       // let expectedWeightUSD = toWei(0.251377181790189667);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 0.2 : 0.8;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("23.7841"), toWei(weightToken0)]
+        [toWei("23.7841"), toWei("0.2")]
       );
 
       const exitPoolRequest = {
@@ -2034,13 +1977,13 @@ describe("Remove Liquidity", () => {
       // Passing in dead address instead of WETH
       Router = await routerContract.deploy(DEAD_ADDRESS);
 
-      const factoryContract = await ethers.getContractFactory("HedgeFactory");
-      HedgeFactory = await factoryContract.deploy(Router.address);
+      const factoryContract = await ethers.getContractFactory("GamutFactory");
+      GamutFactory = await factoryContract.deploy(Router.address);
 
       const zygContract = await ethers.getContractFactory("TestToken");
       ZYG = await zygContract.deploy("Zygnus", "ZYG", 9);
 
-      await Router.setHedgeFactory(HedgeFactory.address);
+      await Router.setGamutFactory(GamutFactory.address);
 
       // APPROVING TOKENS TO ROUTER CONTRACT
 
@@ -2064,7 +2007,7 @@ describe("Remove Liquidity", () => {
       // CREATING POOL AND INITIALIZING IT
 
       const receipt = await (
-        await HedgeFactory.create(
+        await GamutFactory.create(
           BTC.address,
           USD.address,
           toWei("0.75"),
@@ -2074,7 +2017,7 @@ describe("Remove Liquidity", () => {
         )
       ).wait();
 
-      let poolAddress = await HedgeFactory.getPool(BTC.address, USD.address);
+      let poolAddress = await GamutFactory.getPool(BTC.address, USD.address);
       Pool = await ethers.getContractAt("Pool", poolAddress);
 
       // Values must be decimal-normalized! (USDT has 6 decimals)
@@ -2108,11 +2051,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 90-10 against 237.841 (10%) LP", async () => {
       // let expectedWeightBTC = toWei(0.753898403222172379);
       // let expectedWeightUSD = toWei(0.246101596777827621);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 0.9 : 0.1;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("237.841"), toWei(weightToken0)]
+        [toWei("237.841"), toWei("0.9")]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -2183,11 +2125,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 90 - 10 against 2259.4895 (95%) LP", async () => {
       // let expectedWeightBTC = toWei(0.769230582694164603);
       // let expectedWeightUSD = toWei(0.230769417305835397);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 0.9 : 0.1;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("2259.4895"), toWei(weightToken0)]
+        [toWei("2259.4895"), toWei("0.9")]
       );
       const exitPoolRequest = {
         tokens: tokens,
@@ -2258,11 +2199,10 @@ describe("Remove Liquidity", () => {
     it("Remove liquidity 90 - 10 against 23.7841 (1%) LP", async () => {
       // let expectedWeightBTC = toWei(0.750376127561210792);
       // let expectedWeightUSD = toWei(0.249623872438789208);
-      let weightToken0 = tokenSorted(BTC.address, USD.address) ? 0.9 : 0.1;
 
       const initUserData = ethers.utils.defaultAbiCoder.encode(
         ["uint256", "uint256"],
-        [toWei("23.7841"), toWei(weightToken0)]
+        [toWei("23.7841"), toWei("0.9")]
       );
       const exitPoolRequest = {
         tokens: tokens,

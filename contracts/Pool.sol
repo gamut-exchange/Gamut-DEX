@@ -3,10 +3,10 @@ pragma solidity 0.8.11;
 
 import "./lib/helpers/InputHelpers.sol";
 import "./WeightedMath.sol";
-import "./HedgePoolToken.sol";
+import "./GamutToken.sol";
 import "./lib/helpers/Decoder.sol";
 
-contract Pool is WeightedMath, HedgePoolToken {
+contract Pool is WeightedMath, GamutToken {
     using Decoder for bytes;
     using FixedPoint for uint256;
     using SafeCast for uint256;
@@ -95,6 +95,22 @@ contract Pool is WeightedMath, HedgePoolToken {
 
         _weight0 = params.weight0;
         _weight1 = params.weight1;
+
+        //----------- Start EtherAuthority 7-Oct-2022 --------------
+        string memory strToken0 = string(
+            abi.encodePacked(_token0.symbol(), "/")
+        );
+        string memory strToken1 = string(
+            abi.encodePacked(strToken0, _token1.symbol())
+        );
+        string memory strGToken = string(abi.encodePacked("Gamut ", strToken1));
+        string memory strPoolName = string(
+            abi.encodePacked(strGToken, " Pool")
+        );
+
+        ERC20.setName(strPoolName);
+        ERC20.setSymbol("Gamut-LP");
+        //----------- End EtherAuthority 7-Oct-2022 -----------------
     }
 
     // Getters / Setters
@@ -303,7 +319,10 @@ contract Pool is WeightedMath, HedgePoolToken {
         uint256 protocolFeeAmount = feeAmount.mulUp(protocolSwapFeePercentage);
         amountIn = amountIn - feeAmount;
 
-        return (amountIn, protocolFeeAmount);
+        return (
+            amountIn,
+            _downscaleDown(protocolFeeAmount, scalingFactorTokenIn)
+        );
     }
 
     function _calcSwapOut(

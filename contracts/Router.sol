@@ -3,14 +3,14 @@ pragma solidity 0.8.11;
 
 import "./lib/helpers/InputHelpers.sol";
 import "./Vault.sol";
-import "./interfaces/IHedgeFactory.sol";
+import "./interfaces/IGamutFactory.sol";
 import "./interfaces/IPool.sol";
 import "./lib/openzeppelin/SafeCast.sol";
 import "./lib/openzeppelin/ReentrancyGuard.sol";
 import "./lib/openzeppelin/Ownable.sol";
 
 contract Router is Vault, ReentrancyGuard, Ownable {
-    IHedgeFactory public Factory;
+    IGamutFactory public Factory;
     using SafeCast for uint256;
 
     enum PoolBalanceChangeKind {
@@ -61,7 +61,7 @@ contract Router is Vault, ReentrancyGuard, Ownable {
      * `assets` array passed to that function, and ETH assets are converted to WETH.
      *
      * If `amount` is zero, the multihop mechanism is used to determine the actual amount based on the amount in/out
-     * from the previous swap.
+     * from the previous swap, depending on the swap kind.
      */
     struct BatchSwapStep {
         uint256 assetInIndex;
@@ -77,6 +77,8 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         address sender;
         address payable recipient;
     }
+
+    event FactoryAddressSet(address factoryAddress);
 
     event PoolBalanceChanged(
         address indexed liquidityProvider,
@@ -98,10 +100,11 @@ contract Router is Vault, ReentrancyGuard, Ownable {
 
     constructor(IWETH _weth) AssetHelpers(_weth) {}
 
-    function setHedgeFactory(IHedgeFactory _factory) external onlyOwner {
+    function setGamutFactory(IGamutFactory _factory) external onlyOwner {
         _require(address(_factory) != address(0), Errors.ZERO_TOKEN);
         _require(address(Factory) == address(0), Errors.FACTORY_ALREADY_SET);
         Factory = _factory;
+        emit FactoryAddressSet(address(_factory));
     }
 
     /**
@@ -136,10 +139,10 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         external
         payable
     {
+        _require(recipient != address(0), Errors.ZERO_ADDRESS);
+
         // This function doesn't have the nonReentrant modifier: it is applied to `_joinOrExit` instead.
 
-        // Note that `recipient` is not actually payable in the context of a join - we cast it because we handle both
-        // joins and exits at once.
         _joinOrExit(
             PoolBalanceChangeKind.JOIN,
             msg.sender,
@@ -149,6 +152,8 @@ contract Router is Vault, ReentrancyGuard, Ownable {
     }
 
     function exitPool(address sender, ExitPoolRequest memory request) external {
+        _require(sender != address(0), Errors.ZERO_ADDRESS);
+
         // This function doesn't have the nonReentrant modifier: it is applied to `_joinOrExit` instead.
         _joinOrExit(
             PoolBalanceChangeKind.EXIT,
@@ -523,8 +528,10 @@ contract Router is Vault, ReentrancyGuard, Ownable {
 
         InputHelpers.ensureInputLengthMatch(assets.length, limits.length);
 
+        uint256[] memory protocolSwapFees = new uint256[](assets.length - 1);
+
         // Perform the swaps, updating the Pool token balances and computing the net Vault asset deltas.
-        assetDeltas = _swapWithPools(swaps, assets, funds);
+        (assetDeltas, protocolSwapFees) = _swapWithPools(swaps, assets, funds);
 
         // Process asset deltas, by either transferring assets from the sender (for positive deltas) or to the recipient
         // (for negative deltas).
@@ -545,6 +552,14 @@ contract Router is Vault, ReentrancyGuard, Ownable {
                 uint256 toSend = uint256(-delta);
                 _sendAsset(asset, toSend, funds.recipient);
             }
+
+            if (i < assets.length - 1) {
+                _payFeeAmount(
+                    Factory.getProtocolFeesCollector(),
+                    IERC20(asset),
+                    protocolSwapFees[i]
+                );
+            }
         }
 
         // Handle any used and remaining ETH.
@@ -560,8 +575,14 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         BatchSwapStep[] memory swaps,
         address[] memory assets,
         FundManagement memory funds
-    ) private returns (int256[] memory assetDeltas) {
+    )
+        private
+        returns (int256[] memory assetDeltas, uint256[] memory protocolSwapFees)
+    {
         assetDeltas = new int256[](assets.length);
+
+        // Because protocol swap fee is not charged on 'amountOut'
+        protocolSwapFees = new uint256[](assets.length - 1);
 
         // These variables could be declared inside the loop, but that causes the compiler to allocate memory on each
         // loop iteration, increasing gas costs.
@@ -571,9 +592,6 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         // These store data about the previous swap here to implement multihop logic across swaps.
         IERC20 previousTokenCalculated;
         uint256 previousAmountCalculated;
-
-        // Local copy to save gas
-        address protocolFeeCollector = Factory.getProtocolFeesCollector();
 
         for (uint256 i = 0; i < swaps.length; ++i) {
             batchSwapStep = swaps[i];
@@ -631,9 +649,9 @@ contract Router is Vault, ReentrancyGuard, Ownable {
             assetDeltas[batchSwapStep.assetOutIndex] =
                 assetDeltas[batchSwapStep.assetOutIndex] -
                 amountOut.toInt256();
-
-            // Paying fee right away to avoid tracking assetIn and it's respective protocol swap fee
-            _payFeeAmount(protocolFeeCollector, tokenIn, protocolSwapFeeAmount);
+            protocolSwapFees[
+                batchSwapStep.assetInIndex
+            ] += protocolSwapFeeAmount;
         }
     }
 
@@ -672,6 +690,111 @@ contract Router is Vault, ReentrancyGuard, Ownable {
         signedValues = new int256[](values.length);
         for (uint256 i = 0; i < values.length; i++) {
             signedValues[i] = positive ? int256(values[i]) : -int256(values[i]);
+        }
+    }
+
+    // This function is not marked as `nonReentrant` because the underlying mechanism relies on reentrancy
+    function queryBatchSwap(
+        BatchSwapStep[] memory swaps,
+        address[] memory assets,
+        FundManagement memory funds
+    ) external returns (int256[] memory deltas) {
+        // In order to accurately 'simulate' swaps, this function actually does perform the swaps, including calling the
+        // Pool hooks and updating balances in storage. However, once it computes the final Vault Deltas, it
+        // reverts unconditionally, returning this array as the revert data.
+        //
+        // By wrapping this reverting call, we can decode the deltas 'returned' and return them as a normal Solidity
+        // function would. The only caveat is the function becomes non-view, but off-chain clients can still call it
+        // via eth_call to get the expected result.
+        //
+        // This technique was inspired by the work from the Gnosis team in the Gnosis Safe contract:
+        // https://github.com/gnosis/safe-contracts/blob/v1.2.0/contracts/GnosisSafe.sol#L265
+        //
+        // Most of this function is implemented using inline assembly, as the actual work it needs to do is not
+        // significant, and Solidity is not particularly well-suited to generate this behavior, resulting in a large
+        // amount of generated bytecode.
+
+        if (msg.sender != address(this)) {
+            // We perform an external call to ourselves, forwarding the same calldata. In this call, the else clause of
+            // the preceding if statement will be executed instead.
+
+            // solhint-disable-next-line avoid-low-level-calls
+            (bool success, ) = address(this).call(msg.data);
+
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                // This call should always revert to decode the actual asset deltas from the revert reason
+                switch success
+                case 0 {
+                    // Note we are manually writing the memory slot 0. We can safely overwrite whatever is
+                    // stored there as we take full control of the execution and then immediately return.
+
+                    // We copy the first 4 bytes to check if it matches with the expected signature, otherwise
+                    // there was another revert reason and we should forward it.
+                    returndatacopy(0, 0, 0x04)
+                    let error := and(
+                        mload(0),
+                        0xffffffff00000000000000000000000000000000000000000000000000000000
+                    )
+
+                    // If the first 4 bytes don't match with the expected signature, we forward the revert reason.
+                    if eq(
+                        eq(
+                            error,
+                            0xfa61cc1200000000000000000000000000000000000000000000000000000000
+                        ),
+                        0
+                    ) {
+                        returndatacopy(0, 0, returndatasize())
+                        revert(0, returndatasize())
+                    }
+
+                    // The returndata contains the signature, followed by the raw memory representation of an array:
+                    // length + data. We need to return an ABI-encoded representation of this array.
+                    // An ABI-encoded array contains an additional field when compared to its raw memory
+                    // representation: an offset to the location of the length. The offset itself is 32 bytes long,
+                    // so the smallest value we  can use is 32 for the data to be located immediately after it.
+                    mstore(0, 32)
+
+                    // We now copy the raw memory array from returndata into memory. Since the offset takes up 32
+                    // bytes, we start copying at address 0x20. We also get rid of the error signature, which takes
+                    // the first four bytes of returndata.
+                    let size := sub(returndatasize(), 0x04)
+                    returndatacopy(0x20, 0x04, size)
+
+                    // We finally return the ABI-encoded array, which has a total length equal to that of the array
+                    // (returndata), plus the 32 bytes for the offset.
+                    return(0, add(size, 32))
+                }
+                default {
+                    // This call should always revert, but we fail nonetheless if that didn't happen
+                    invalid()
+                }
+            }
+        } else {
+            (deltas, ) = _swapWithPools(swaps, assets, funds);
+
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                // We will return a raw representation of the array in memory, which is composed of a 32 byte length,
+                // followed by the 32 byte int256 values. Because revert expects a size in bytes, we multiply the array
+                // length (stored at `deltas`) by 32.
+                let size := mul(mload(deltas), 32)
+
+                // We send one extra value for the error signature "QueryError(int256[])" which is 0xfa61cc12.
+                // We store it in the previous slot to the `deltas` array. We know there will be at least one available
+                // slot due to how the memory scratch space works.
+                // We can safely overwrite whatever is stored in this slot as we will revert immediately after that.
+                mstore(
+                    sub(deltas, 0x20),
+                    0x00000000000000000000000000000000000000000000000000000000fa61cc12
+                )
+                let start := sub(deltas, 0x04)
+
+                // When copying from `deltas` into returndata, we copy an additional 36 bytes to also return the array's
+                // length and the error signature.
+                revert(start, add(size, 36))
+            }
         }
     }
 }

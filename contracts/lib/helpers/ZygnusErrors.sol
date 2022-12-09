@@ -94,6 +94,7 @@ library Errors {
     uint256 internal constant INPUT_LENGTH_MISMATCH = 101;
     uint256 internal constant ZERO_TOKEN = 102;
     uint256 internal constant ZERO_AMOUNT_IN = 103;
+    uint256 internal constant ZERO_ADDRESS = 104;
 
     // Pools
     uint256 internal constant CALLER_NOT_POOL_OWNER = 200;

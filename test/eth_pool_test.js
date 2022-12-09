@@ -7,8 +7,8 @@ const provider = waffle.provider;
 const web3 = require("web3");
 const { toWei, tokenSorted } = require("./helper");
 
-describe("Hedge Factory + Router + Vault + Tokens", function () {
-  let HedgeFactory;
+describe("Gamut Factory + Router + Vault + Tokens", function () {
+  let GamutFactory;
   let Router;
   let BTC;
   let USD;
@@ -40,10 +40,10 @@ describe("Hedge Factory + Router + Vault + Tokens", function () {
 
     Router = await routerContract.deploy(WETH.address);
 
-    const factoryContract = await ethers.getContractFactory("HedgeFactory");
-    HedgeFactory = await factoryContract.deploy(Router.address);
+    const factoryContract = await ethers.getContractFactory("GamutFactory");
+    GamutFactory = await factoryContract.deploy(Router.address);
 
-    await Router.setHedgeFactory(HedgeFactory.address);
+    await Router.setGamutFactory(GamutFactory.address);
   });
 
   it("Create and Initialize BTC-WETH Pool", async () => {
@@ -69,7 +69,7 @@ describe("Hedge Factory + Router + Vault + Tokens", function () {
     // CREATING POOL AND INITIALIZING IT
 
     const receipt = await (
-      await HedgeFactory.create(
+      await GamutFactory.create(
         BTC.address,
         WETH.address,
         web3.utils.toWei("0.75"),
@@ -79,7 +79,7 @@ describe("Hedge Factory + Router + Vault + Tokens", function () {
       )
     ).wait();
 
-    let poolAddress = await HedgeFactory.getPool(BTC.address, WETH.address);
+    let poolAddress = await GamutFactory.getPool(BTC.address, WETH.address);
     Pool = await ethers.getContractAt("Pool", poolAddress);
     const initialBalances = tokenSorted(BTC.address, WETH.address)
       ? [toWei(1000), toWei(2000)]
@@ -111,9 +111,9 @@ describe("Hedge Factory + Router + Vault + Tokens", function () {
     // let expectedWeightBTC = toWei(0.719337095662402656);
     // let expectedWeightUSD = toWei(0.280662904337597344);
     // LP Tokens = 1222.153942384396670279;
-    // console.log("a", HedgeFactory.address);
+    // console.log("a", GamutFactory.address);
     // console.log(WETH.address);
-    // let poolAddress = await HedgeFactory.getPool(BTC.address, WETH.address);
+    // let poolAddress = await GamutFactory.getPool(BTC.address, WETH.address);
     // console.log(poolAddress);
 
     let joinAmount = toWei(10);
