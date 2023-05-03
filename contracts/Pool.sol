@@ -267,7 +267,9 @@ contract Pool is WeightedMath, GamutToken {
             balanceTokenIn,
             balanceTokenOut
         );
-        _updateWeights(tokenIn, balanceTokenOut, balanceTokenOut - amountOut);
+    
+        _updateWeights(tokenIn, balanceTokenOut, 
+            balanceTokenOut - amountOut, balanceTokenIn, balanceTokenIn + amountIn);
 
         // amountOut tokens are exiting the Pool, so we round down.
         return (
@@ -306,7 +308,8 @@ contract Pool is WeightedMath, GamutToken {
             balanceTokenOut
         );
 
-        _updateWeights(tokenIn, balanceTokenOut, balanceTokenOut - amountOut);
+        _updateWeights(tokenIn, balanceTokenOut, 
+            balanceTokenOut - amountOut, balanceTokenIn, balanceTokenIn + amountIn);
     }
 
     function _calcPoolAndProtocolSwapFee(
@@ -351,7 +354,9 @@ contract Pool is WeightedMath, GamutToken {
     function _updateWeights(
         IERC20 tokenIn,
         uint256 balanceOutOld,
-        uint256 balanceOutNew
+        uint256 balanceOutNew,
+        uint256 balanceInOld,
+        uint256 balanceInNew
     ) private {
         (
             bool tokenInIsToken0,
@@ -365,7 +370,9 @@ contract Pool is WeightedMath, GamutToken {
             weightIn,
             weightOut,
             balanceOutOld,
-            balanceOutNew
+            balanceOutNew,
+            balanceInOld,
+            balanceInNew
         );
 
         _weight0 = tokenInIsToken0 ? weightInNew : weightOutNew;

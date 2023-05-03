@@ -69,20 +69,22 @@ contract WeightedMath {
         uint256 weightInOld,
         uint256 weightOutOld,
         uint256 balanceOutOld,
-        uint256 balanceOutNew
+        uint256 balanceOutNew,
+        uint256 balanceInOld,
+        uint256 balanceInNew
     ) internal pure returns (uint256 weightInNew, uint256 weightOutNew) {
-        uint256 denominator = weightInOld.divDown(weightOutOld) + ONE;
         uint256 baseWeightInNew;
         uint256 baseWeightOutNew;
         uint256 numerator;
+        uint256 denominator;
         if (weightInOld < weightOutOld) {
-            numerator =
-                (balanceOutOld.divDown(balanceOutNew) - ONE) *
-                (ONE - weightOutOld);
+            denominator = weightInOld.divDown(weightOutOld) + ONE;
+            numerator = (ONE - (ONE.divDown(balanceInNew).mulUp(balanceInOld)))
+                     * weightInOld;    
         } else {
-            numerator =
-                (balanceOutOld.divDown(balanceOutNew) - ONE) *
-                (weightOutOld);
+            denominator = weightOutOld.divDown(weightInOld) + ONE;
+            numerator = ((balanceOutOld.divDown(balanceOutNew)) - ONE)
+                        * weightOutOld;
         }
 
         baseWeightOutNew = numerator / denominator;

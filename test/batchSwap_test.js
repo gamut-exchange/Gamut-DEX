@@ -223,7 +223,7 @@ describe("Batch Swap 18 decimal pools", () => {
       };
 
       const limits = [amountIn, 0, 0];
-      const deadline = 1673602957;
+      const deadline = 1873602957;
 
       await expect(
         Router.batchSwap(batchSwap, assets, funds, limits, deadline)
@@ -259,7 +259,7 @@ describe("Batch Swap 18 decimal pools", () => {
       };
 
       const limits = [amountIn, 0, 0, 0];
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       await expect(
         Router.batchSwap(batchSwap, assets, funds, limits, deadline)

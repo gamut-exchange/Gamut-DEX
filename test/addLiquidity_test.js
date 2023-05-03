@@ -954,7 +954,7 @@ describe("Add Liquidity", () => {
           JOIN_KIND_TOKEN_IN_FOR_EXACT_BPT_OUT,
           joinAmount,
           joinTokenIndex,
-          toWei("0.0001"),
+          toWei("0.000001"),
         ]
       );
 

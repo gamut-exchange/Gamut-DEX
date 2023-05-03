@@ -130,7 +130,7 @@ describe("Single Swap w/ Protocol Fee On (6 - 18) decimals", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -200,7 +200,7 @@ describe("Single Swap w/ Protocol Fee On (6 - 18) decimals", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -277,7 +277,7 @@ describe("Single Swap w/ Protocol Fee On (6 - 18) decimals", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -348,7 +348,7 @@ describe("Single Swap w/ Protocol Fee On (6 - 18) decimals", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -418,7 +418,7 @@ describe("Single Swap w/ Protocol Fee On (6 - 18) decimals", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -489,7 +489,7 @@ describe("Single Swap w/ Protocol Fee On (6 - 18) decimals", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -668,7 +668,7 @@ describe("Single Swap w/ Protocol Fee On 18 decimals pool tokens", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -751,7 +751,7 @@ describe("Single Swap w/ Protocol Fee On 18 decimals pool tokens", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -840,7 +840,7 @@ describe("Single Swap w/ Protocol Fee On 18 decimals pool tokens", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -929,7 +929,7 @@ describe("Single Swap w/ Protocol Fee On 18 decimals pool tokens", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -1012,7 +1012,7 @@ describe("Single Swap w/ Protocol Fee On 18 decimals pool tokens", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -1101,7 +1101,7 @@ describe("Single Swap w/ Protocol Fee On 18 decimals pool tokens", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];

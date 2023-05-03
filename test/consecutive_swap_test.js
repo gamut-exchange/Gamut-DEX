@@ -111,7 +111,7 @@ describe("Consecutive Single Swap (18 decimal)", () => {
       let amountIn = web3.utils.toWei("5");
       let expectedOutputAmount = web3.utils.toWei("1.066549922318995");
       let weightInAfterSwap = web3.utils.toWei("0.299775785380227711");
-      let weightOutAfterSwap = web3.utils.toWei("0.700224214619772289");
+      let weightOutAfterSwap = web3.utils.toWei("0.700523168386953940");
 
       const singleSwap = {
         tokenIn: tokenIn,
@@ -125,7 +125,7 @@ describe("Consecutive Single Swap (18 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -202,7 +202,7 @@ describe("Consecutive Single Swap (18 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -279,7 +279,7 @@ describe("Consecutive Single Swap (18 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -356,7 +356,7 @@ describe("Consecutive Single Swap (18 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -439,7 +439,7 @@ describe("Consecutive Single Swap (18 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -536,7 +536,7 @@ describe("Consecutive Single Swap (18 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -619,7 +619,7 @@ describe("Consecutive Single Swap (18 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -812,7 +812,7 @@ describe("Consecutive Single Swap (6-9 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -885,7 +885,7 @@ describe("Consecutive Single Swap (6-9 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -950,7 +950,7 @@ describe("Consecutive Single Swap (6-9 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -1015,7 +1015,7 @@ describe("Consecutive Single Swap (6-9 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -1087,7 +1087,7 @@ describe("Consecutive Single Swap (6-9 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -1159,7 +1159,7 @@ describe("Consecutive Single Swap (6-9 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];
@@ -1231,7 +1231,7 @@ describe("Consecutive Single Swap (6-9 decimal)", () => {
       };
 
       const limit = web3.utils.toWei("0");
-      const deadline = 1673602957;
+      const deadline = 1773602957;
 
       const result = await Pool.getPoolBalancesAndChangeBlock();
       const balance0BeforeSwap = result[0];

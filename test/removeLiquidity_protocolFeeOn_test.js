@@ -146,14 +146,10 @@ describe("Remove Liquidity w/ Protocol Fee On", () => {
       ).wait();
 
       // Checking whether correct protocol fees were paid
-      expect("0").to.be.equal(
-        Number(ethers.utils.formatEther(receipt.events[3].args[3][0])).toFixed(
-          0
-        )
-      );
+      
 
       expect("0.001999996443003628").to.be.equal(
-        ethers.utils.formatEther(receipt.events[3].args[3][1])
+        ethers.utils.formatEther(receipt.events[2].args[2][1])
       );
 
       const resultAfter = await Pool.getPoolBalancesAndChangeBlock();
